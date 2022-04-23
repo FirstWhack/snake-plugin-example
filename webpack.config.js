@@ -8,7 +8,7 @@ const deps = require("./package.json").dependencies;
 
 module.exports = (_, argv) => ({
   entry: "./index.js",
-  mode: "development",
+  mode: argv.mode,
   devtool: "eval-cheap-source-map",
   devServer: {
     contentBase: path.join(__dirname, "dist"),
