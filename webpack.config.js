@@ -21,8 +21,7 @@ module.exports = (_, argv) => ({
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules(?:\/@micro-snake)/,
+        use: "ts-loader"
       },
     ],
   },
