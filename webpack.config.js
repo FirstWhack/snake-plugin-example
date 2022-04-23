@@ -22,7 +22,7 @@ module.exports = (_, argv) => ({
       {
         test: /\.tsx?$/,
         use: "ts-loader",
-        exclude: /node_modules(?:\/@micro-snake)/,
+        // exclude: /node_modules(?:\/@micro-snake)/,
       },
     ],
   },
