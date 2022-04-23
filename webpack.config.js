@@ -1,72 +1,69 @@
-const path = require('path');
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require("path");
+const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const { ModuleFederationPlugin } = webpack.container;
+const storeHomepage = require("@micro-snake/engine/package.json").homepage;
+const deps = require("./package.json").dependencies;
 
-module.exports = {
-  entry: './index.js',
-  mode: 'development',
-  devtool: false,
+module.exports = (_, argv) => ({
+  entry: "./index.js",
+  mode: "development",
+  devtool: "eval-cheap-source-map",
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
-    port: 1338
+    contentBase: path.join(__dirname, "dist"),
+    port: 1338,
   },
   output: {
-    publicPath: 'auto'
+    publicPath: "auto",
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules(?:\/@micro-snake)/
-      }
-    ]
+        use: "ts-loader",
+        exclude: /node_modules(?:\/@micro-snake)/,
+      },
+    ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.jsx']
+    extensions: [".tsx", ".ts", ".js", ".jsx"],
   },
   plugins: [
     new ModuleFederationPlugin({
-      name: 'fruit',
-      filename: 'remoteEntry.js',
+      name: "fruit",
+      filename: "remoteEntry.js",
       exposes: {
-        './Apple': './src/components/apple/apple',
-        './Plum': './src/components/plum/plumContainer'
+        "./Apple": "./src/components/apple/apple",
+        "./Plum": "./src/components/plum/plumContainer",
       },
       remotes: {
-        engine: `engine@${getRemoteEntryUrl(1339)}`
+        engine: `engine@${storeHomepage}/remoteEntry.js`,
       },
       shared: [
         {
           react: {
             singleton: true,
-            eager: true,
-            requiredVersion: '^17.0.2'
+            requiredVersion: deps.react,
           },
-          mobx: { eager: true },
-          'mobx-react': { eager: true }
-        }
-      ]
+          "react-konva": {
+            singleton: true,
+            requiredVersion: deps["react-konva"],
+          },
+          konva: {
+            singleton: true,
+            requiredVersion: deps.konva,
+          },
+          mobx: { singleton: true, requiredVersion: deps.mobx },
+          "mobx-react": {
+            singleton: true,
+            requiredVersion: deps["mobx-react"],
+          },
+        },
+      ],
     }),
     new HtmlWebpackPlugin({
-      template: './index.html'
-    })
-  ]
-};
-
-function getRemoteEntryUrl(port) {
-  const { CODESANDBOX_SSE, HOSTNAME = '' } = process.env;
-
-  // Check if the example is running on codesandbox
-  // https://codesandbox.io/docs/environment
-  if (!CODESANDBOX_SSE) {
-    return `//localhost:${port}/remoteEntry.js`;
-  }
-
-  const parts = HOSTNAME.split('-');
-  const codesandboxId = parts[parts.length - 1];
-
-  return `//${codesandboxId}-${port}.sse.codesandbox.io/remoteEntry.js`;
-}
+      template: "./index.html",
+    }),
+  ],
+});
